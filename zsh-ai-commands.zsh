@@ -24,7 +24,7 @@ fzf_ai_commands() {
   ZSH_AI_COMMANDS_GPT_USER="Description of what the command should do:\n'''\n$ZSH_AI_COMMANDS_USER_QUERY\n'''\nGive me the appropriate command."
 
   ZSH_AI_COMMANDS_GPT_REQUEST_BODY='{
-    "model": "$ZSH_AI_COMMANDS_LLM_NAME",
+    "model": "'$ZSH_AI_COMMANDS_LLM_NAME'",
     "n": 5,
     "temperature": 1,
     "messages": [
