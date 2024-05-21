@@ -29,7 +29,7 @@ fzf_ai_commands() {
     ]
   }'
 
-  ZSH_AI_COMMANDS_GTP_RESPONSE=$(curl --silent https://api.openai.com/v1/chat/completions \
+  ZSH_AI_COMMANDS_GTP_RESPONSE=$(curl -q --silent https://api.openai.com/v1/chat/completions \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $ZSH_AI_COMMANDS_OPENAI_API_KEY" \
     -d "$ZSH_AI_COMMANDS_GPT_REQUEST_BODY")
