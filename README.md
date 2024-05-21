@@ -1,7 +1,7 @@
 # ZSH AI Commands
 ![zsh-ai-commands-demo](./zsh-ai-commands-demo.gif)
 
-This plugin works by asking GPT (*gpt-4-turbo-preview*) for terminal commands that achieve the described target action.
+This plugin works by asking GPT (*gpt-4o*) for terminal commands that achieve the described target action.
 
 To use it just type what you want to do (e.g. `list all files in this directory`) and hit the configured hotkey (default: `Ctrl+o`).
 When GPT responds with its suggestions just select the one from the list you want to use.
@@ -9,6 +9,7 @@ When GPT responds with its suggestions just select the one from the list you wan
 ## Requirements
 * [curl](https://curl.se/)
 * [fzf](https://github.com/junegunn/fzf)
+* awk
 
 ## Installation
 
@@ -41,6 +42,9 @@ The config can be set e.g in your `.zshrc` in this case be careful to not leak t
 | ----------------------------------------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `ZSH_AI_COMMANDS_OPENAI_API_KEY` | `-/-` (not set) | OpenAI API key |
 | `ZSH_AI_COMMANDS_HOTKEY` | `'^o'` (Ctrl+o) | Hotkey to trigger the request |
+| `ZSH_AI_COMMANDS_LLM_NAME` | `gpt-4o` | LLM name |
+| `ZSH_AI_COMMANDS_N_GENERATIONS` | `5` | Number of completions to ask for |
+| `ZSH_AI_COMMANDS_EXPLAINER` | `true` | If true, GPT will comment the command |
 
 
 ## Known Bugs
