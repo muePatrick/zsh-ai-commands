@@ -9,6 +9,8 @@
 
 (( ! ${+ZSH_AI_COMMANDS_LLM_NAME} )) && typeset -g ZSH_AI_COMMANDS_LLM_NAME='gpt-4o'
 
+(( ! ${+ZSH_AI_COMMANDS_N_GENERATIONS} )) && typeset -g ZSH_AI_COMMANDS_N_GENERATIONS=10
+
 fzf_ai_commands() {
   setopt extendedglob
 
@@ -25,7 +27,7 @@ fzf_ai_commands() {
 
   ZSH_AI_COMMANDS_GPT_REQUEST_BODY='{
     "model": "'$ZSH_AI_COMMANDS_LLM_NAME'",
-    "n": 5,
+    "n": '$ZSH_AI_COMMANDS_N_GENERATIONS',
     "temperature": 1,
     "messages": [
       {
