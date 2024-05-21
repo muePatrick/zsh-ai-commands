@@ -20,7 +20,7 @@ fzf_ai_commands() {
   ZSH_AI_COMMANDS_GPT_MESSAGE_CONTENT="Give me a linux terminal command to do the following: $ZSH_AI_COMMANDS_USER_QUERY. Respond with a json array of possible commands only. Each entry should be a new entry. Each entry should only contain the command. No additional text should be present. Give multiple suggestion if possible. The commands should be for linux."
 
   ZSH_AI_COMMANDS_GPT_REQUEST_BODY='{
-    "model": "gpt-4-turbo-preview",
+    "model": "gpt-4o",
     "messages": [
       {
         "role": "user",
