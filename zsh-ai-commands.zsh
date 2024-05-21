@@ -17,14 +17,21 @@ fzf_ai_commands() {
   zle end-of-line
   zle reset-prompt
 
-  ZSH_AI_COMMANDS_GPT_MESSAGE_CONTENT="Give me a linux terminal command to do the following: $ZSH_AI_COMMANDS_USER_QUERY. Respond with a json array of possible commands only. Each entry should be a new entry. Each entry should only contain the command. No additional text should be present. Give multiple suggestion if possible. The commands should be for linux."
+  ZSH_AI_COMMANDS_GPT_SYSTEM="You only answer 1 appropriate shell one liner that does what the user asks for. The command has to work with the $(basename $SHELL) terminal. Don't wrap your answer in anything, dont acknowledge those rules, don't format your answer. Just reply the plaintext command."
+  ZSH_AI_COMMANDS_GPT_USER="Description of what the command should do:\n'''\n$ZSH_AI_COMMANDS_USER_QUERY\n'''\nGive me the appropriate command."
 
   ZSH_AI_COMMANDS_GPT_REQUEST_BODY='{
     "model": "gpt-4o",
+    "n": 5,
+    "temperature": 1,
     "messages": [
       {
+        "role": "system",
+        "content": "'$ZSH_AI_COMMANDS_GPT_SYSTEM'"
+      },
+      {
         "role": "user",
-        "content": "'$ZSH_AI_COMMANDS_GPT_MESSAGE_CONTENT'"
+        "content": "'$ZSH_AI_COMMANDS_GPT_USER'"
       }
     ]
   }'
@@ -35,18 +42,8 @@ fzf_ai_commands() {
     -d "$ZSH_AI_COMMANDS_GPT_REQUEST_BODY")
   local ret=$?
 
-  # replace all newlines with spaces
-  ZSH_AI_COMMANDS_COMMAND_SELECTION=$(echo $ZSH_AI_COMMANDS_GTP_RESPONSE | tr -d '\n')
-  # get the first suggestion
-  ZSH_AI_COMMANDS_COMMAND_SELECTION=$(echo $ZSH_AI_COMMANDS_COMMAND_SELECTION | jq -r '.choices[0].message.content')
-  # remove the string ```json from the beginning of the string
-  ZSH_AI_COMMANDS_COMMAND_SELECTION=$(echo $ZSH_AI_COMMANDS_COMMAND_SELECTION | sed 's/```json//g')
-  # remove the string ``` from the end of the string
-  ZSH_AI_COMMANDS_COMMAND_SELECTION=$(echo $ZSH_AI_COMMANDS_COMMAND_SELECTION | sed 's/```//g')
-
-  # FIXME: The json array cannot be parsed if there are too many / unexpected special characters in the response
-  ZSH_AI_COMMANDS_SELECTED_COMMAND=$(echo $ZSH_AI_COMMANDS_COMMAND_SELECTION | jq -r '.[]' | fzf)
-  BUFFER=$ZSH_AI_COMMANDS_SELECTED_COMMAND
+  # get the answers
+  BUFFER=$(echo $ZSH_AI_COMMANDS_GTP_RESPONSE | jq -r '.choices[].message.content' | uniq | fzf)
 
   zle end-of-line
   zle reset-prompt
