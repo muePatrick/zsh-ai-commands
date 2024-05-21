@@ -14,6 +14,8 @@
 fzf_ai_commands() {
   setopt extendedglob
 
+  [ -n "$BUFFER" ] || { echo "Empty prompt" ; return }
+
   ZSH_AI_COMMANDS_USER_QUERY=$BUFFER
 
   # FIXME: For some reason the buffer is only updated if zsh-autosuggestions is enabled
