@@ -21,7 +21,7 @@ fzf_ai_commands() {
   ZSH_AI_COMMANDS_USER_QUERY=$BUFFER
 
   # FIXME: For some reason the buffer is only updated if zsh-autosuggestions is enabled
-  BUFFER="Asking GPT-4 for a command to do: $ZSH_AI_COMMANDS_USER_QUERY. Please wait..."
+  BUFFER="Asking $ZSH_AI_COMMANDS_LLM_NAME for a command to do: $ZSH_AI_COMMANDS_USER_QUERY. Please wait..."
   zle end-of-line
   zle reset-prompt
 
