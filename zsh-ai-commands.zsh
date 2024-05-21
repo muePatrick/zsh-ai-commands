@@ -85,10 +85,10 @@ fzf_ai_commands() {
   if [ $ZSH_AI_COMMANDS_EXPLAINER = true ]
   then
     ZSH_AI_COMMANDS_SUGGESTIONS=$(echo $ZSH_AI_COMMANDS_GPT_RESPONSE | jq -r '.choices[].message.content' | uniq | sort | awk -F ' *## ' '!seen[$1]++' -)
-    ZSH_AI_COMMANDS_SELECTED=$(echo $ZSH_AI_COMMANDS_SUGGESTIONS | fzf --reverse --height=100% --preview-window down:wrap --preview 'echo {} | awk -F " ## " "{print \$2}"')
+    ZSH_AI_COMMANDS_SELECTED=$(echo $ZSH_AI_COMMANDS_SUGGESTIONS | fzf --reverse --height=~100% --preview-window down:wrap --preview 'echo {} | awk -F " ## " "{print \$2}"')
   else
     ZSH_AI_COMMANDS_SUGGESTIONS=$(echo $ZSH_AI_COMMANDS_GPT_RESPONSE | jq -r '.choices[].message.content' | uniq)
-    ZSH_AI_COMMANDS_SELECTED=$(echo $ZSH_AI_COMMANDS_SUGGESTIONS | fzf --reverse --height=100% --preview-window down:wrap --preview 'echo {}')
+    ZSH_AI_COMMANDS_SELECTED=$(echo $ZSH_AI_COMMANDS_SUGGESTIONS | fzf --reverse --height=~100% --preview-window down:wrap --preview 'echo {}')
   fi
 
 
