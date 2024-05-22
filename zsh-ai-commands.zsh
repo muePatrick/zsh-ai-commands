@@ -27,8 +27,11 @@ fzf_ai_commands() {
 
   if [ $ZSH_AI_COMMANDS_EXPLAINER = true ]
   then
-    ZSH_AI_COMMANDS_GPT_SYSTEM="You only answer 1 appropriate shell one liner that does what the user asks for. The command has to work with the $(basename $SHELL) terminal. Don't wrap your answer in anything, dont acknowledge those rules, don't format your answer. Just reply the plaintext command. If your command is complicated and uses arguments, you MUST end your shell command with a shell comment starting with ## with a very concise explanation but your whole answer must remain a oneliner. Consider each new question from the user as independant."
-  ZSH_AI_COMMANDS_GPT_USER="Description of what the command should do:\n'''\n$ZSH_AI_COMMANDS_USER_QUERY\n'''\nGive me the appropriate command."
+    ZSH_AI_COMMANDS_GPT_SYSTEM="You only answer 1 appropriate shell one liner that does what the user asks for. The command has to work with the $(basename $SHELL) terminal. Don't wrap your answer in code blocks or anything, dont acknowledge those rules, don't format your answer. Just reply the plaintext command. If your answer uses arguments or flags, you MUST end your shell command with a shell comment starting with ## with a ; separated list of concise explanations about each agument. Don't explain obvious placeholders like <ip> or <serverport> etc. Remember that your whole answer MUST remain a oneliner."
+
+  ZSH_AI_COMMANDS_GPT_EX="Description of what the command should do: 'list files, sort by descending size'. Give me the appropriate command."
+  ZSH_AI_COMMANDS_GPT_EX_REPLY="ls -lSr ## -l long listing ; -S sort by file size ; -r reverse order"
+  ZSH_AI_COMMANDS_GPT_USER="Description of what the command should do: '$ZSH_AI_COMMANDS_USER_QUERY'. Give me the appropriate command."
     ZSH_AI_COMMANDS_GPT_REQUEST_BODY='{
     "model": "'$ZSH_AI_COMMANDS_LLM_NAME'",
     "n": '$ZSH_AI_COMMANDS_N_GENERATIONS',
@@ -40,11 +43,11 @@ fzf_ai_commands() {
       },
       {
         "role": "user",
-        "content": "Description of what the command should do:\n'''"\nlist files, sort by descending size\n"'''\nGive me the appropriate command."
+        "content": "'$ZSH_AI_COMMANDS_GPT_EX'"
       },
       {
         "role": "assistant",
-        "content": "ls -lS ## -l long listing -S sort by file size -r reverse order"
+        "content": "'$ZSH_AI_COMMANDS_GPT_EX_REPLY'"
       },
       {
         "role": "user",
@@ -85,7 +88,12 @@ fzf_ai_commands() {
   if [ $ZSH_AI_COMMANDS_EXPLAINER = true ]
   then
     ZSH_AI_COMMANDS_SUGGESTIONS=$(echo $ZSH_AI_COMMANDS_GPT_RESPONSE | jq -r '.choices[].message.content' | uniq | sort | awk -F ' *## ' '!seen[$1]++' -)
-    ZSH_AI_COMMANDS_SELECTED=$(echo $ZSH_AI_COMMANDS_SUGGESTIONS | fzf --reverse --height=~100% --preview-window down:wrap --preview 'echo {} | awk -F " ## " "{print \$2}"')
+    ZSH_AI_COMMANDS_SUGG_COMMANDS=$(echo $ZSH_AI_COMMANDS_SUGGESTIONS |  awk -F " ## " "{print \$1}")
+    ZSH_AI_COMMANDS_SUGG_COMMENTS=$(echo $ZSH_AI_COMMANDS_SUGGESTIONS |  awk -F " ## " "{print \$2}")
+
+    export ZSH_AI_COMMANDS_SUGG_COMMENTS  # otherwise fzf can't access it
+    ZSH_AI_COMMANDS_SELECTED=$(echo $ZSH_AI_COMMANDS_SUGG_COMMANDS | fzf --reverse --height=~100% --preview-window down:wrap --preview 'echo "$ZSH_AI_COMMANDS_SUGG_COMMENTS" | sed -n "$(({n}+1))"p | sed "s/;/\n/g" | sed "s/^\s*//g;s/\s*$//g"')
+
   else
     ZSH_AI_COMMANDS_SUGGESTIONS=$(echo $ZSH_AI_COMMANDS_GPT_RESPONSE | jq -r '.choices[].message.content' | uniq)
     ZSH_AI_COMMANDS_SELECTED=$(echo $ZSH_AI_COMMANDS_SUGGESTIONS | fzf --reverse --height=~100% --preview-window down:wrap --preview 'echo {}')
