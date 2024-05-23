@@ -85,9 +85,17 @@ fzf_ai_commands() {
     -d "$ZSH_AI_COMMANDS_GPT_REQUEST_BODY")
   local ret=$?
 
+  # if the json parsing fails, we need a desperate parser
+  {
+      ZSH_AI_COMMANDS_PARSED=$(echo $ZSH_AI_COMMANDS_GPT_RESPONSE | jq -r '.choices[].message.content' | uniq)
+  } || {
+      ZSH_AI_COMMANDS_PARSED=$(echo $ZSH_AI_COMMANDS_GPT_RESPONSE | ppp -i 'import re' 're.sub("\[\dm|\\\\033|\\\\e", "DELETED", line)' | jq -r '.choices[].message.content' | uniq)
+  }
+
   if [ $ZSH_AI_COMMANDS_EXPLAINER = true ]
   then
-    ZSH_AI_COMMANDS_SUGGESTIONS=$(echo $ZSH_AI_COMMANDS_GPT_RESPONSE | jq -r '.choices[].message.content' | uniq | sort | awk -F ' *## ' '!seen[$1]++' -)
+    ZSH_AI_COMMANDS_SUGGESTIONS=$(echo $ZSH_AI_COMMANDS_PARSED | sort | awk -F ' *## ' '!seen[$1]++' -)
+
     ZSH_AI_COMMANDS_SUGG_COMMANDS=$(echo $ZSH_AI_COMMANDS_SUGGESTIONS |  awk -F " ## " "{print \$1}")
     ZSH_AI_COMMANDS_SUGG_COMMENTS=$(echo $ZSH_AI_COMMANDS_SUGGESTIONS |  awk -F " ## " "{print \$2}")
 
@@ -95,8 +103,7 @@ fzf_ai_commands() {
     ZSH_AI_COMMANDS_SELECTED=$(echo $ZSH_AI_COMMANDS_SUGG_COMMANDS | fzf --reverse --height=~100% --preview-window down:wrap --preview 'echo "$ZSH_AI_COMMANDS_SUGG_COMMENTS" | sed -n "$(({n}+1))"p | sed "s/;/\n/g" | sed "s/^\s*//g;s/\s*$//g"')
 
   else
-    ZSH_AI_COMMANDS_SUGGESTIONS=$(echo $ZSH_AI_COMMANDS_GPT_RESPONSE | jq -r '.choices[].message.content' | uniq)
-    ZSH_AI_COMMANDS_SELECTED=$(echo $ZSH_AI_COMMANDS_SUGGESTIONS | fzf --reverse --height=~100% --preview-window down:wrap --preview 'echo {}')
+    ZSH_AI_COMMANDS_SELECTED=$(echo $ZSH_AI_COMMANDS_PARSED | fzf --reverse --height=~100% --preview-window down:wrap --preview 'echo {}')
   fi
 
 
