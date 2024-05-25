@@ -9,6 +9,7 @@ When GPT responds with its suggestions just select the one from the list you wan
 ## Requirements
 * [curl](https://curl.se/)
 * [fzf](https://github.com/junegunn/fzf)
+  * note: you need a recent version of fzf (the apt version for example is fairly old and will not work)
 * awk
 
 ## Installation
