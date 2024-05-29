@@ -20,6 +20,8 @@ fzf_ai_commands() {
 
   ZSH_AI_COMMANDS_USER_QUERY=$BUFFER
 
+  echo "$ZSH_AI_COMMANDS_USER_QUERY" >> $HISTFILE
+
   # FIXME: For some reason the buffer is only updated if zsh-autosuggestions is enabled
   BUFFER="Asking $ZSH_AI_COMMANDS_LLM_NAME for a command to do: $ZSH_AI_COMMANDS_USER_QUERY. Please wait..."
   zle end-of-line
