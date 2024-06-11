@@ -68,22 +68,22 @@ fzf_ai_commands() {
     }'
   else
     ZSH_AI_COMMANDS_GPT_SYSTEM="You only answer 1 appropriate shell one liner that does what the user asks for. The command has to work with the $(basename $SHELL) terminal. Don't wrap your answer in anything, dont acknowledge those rules, don't format your answer. Just reply the plaintext command."
-  ZSH_AI_COMMANDS_GPT_USER="Description of what the command should do:\n'''\n$ZSH_AI_COMMANDS_USER_QUERY\n'''\nGive me the appropriate command."
-  ZSH_AI_COMMANDS_GPT_REQUEST_BODY='{
-    "model": "'$ZSH_AI_COMMANDS_LLM_NAME'",
-    "n": '$ZSH_AI_COMMANDS_N_GENERATIONS',
-    "temperature": 1,
-    "messages": [
-      {
-        "role": "system",
-        "content": "'$ZSH_AI_COMMANDS_GPT_SYSTEM'"
-      },
-      {
-        "role": "user",
-        "content": "'$ZSH_AI_COMMANDS_GPT_USER'"
-      }
-    ]
-  }'
+    ZSH_AI_COMMANDS_GPT_USER="Description of what the command should do:\n'''\n$ZSH_AI_COMMANDS_USER_QUERY\n'''\nGive me the appropriate command."
+    ZSH_AI_COMMANDS_GPT_REQUEST_BODY='{
+      "model": "'$ZSH_AI_COMMANDS_LLM_NAME'",
+      "n": '$ZSH_AI_COMMANDS_N_GENERATIONS',
+      "temperature": 1,
+      "messages": [
+        {
+          "role": "system",
+          "content": "'$ZSH_AI_COMMANDS_GPT_SYSTEM'"
+        },
+        {
+          "role": "user",
+          "content": "'$ZSH_AI_COMMANDS_GPT_USER'"
+        }
+      ]
+    }'
   fi
 
   # check request is valid json
