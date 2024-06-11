@@ -1,3 +1,5 @@
+#!/bin/zsh
+
 # Check if required tools are installed
 (( ! $+commands[fzf] )) && return
 (( ! $+commands[curl] )) && return
