@@ -18,6 +18,8 @@ fzf_ai_commands() {
 
   [ -n "$BUFFER" ] || { echo "Empty prompt" ; return }
 
+  BUFFER=$(echo "$BUFFER" | sed 's/^AI_ASK: //g')
+
   ZSH_AI_COMMANDS_USER_QUERY=$BUFFER
 
   # save to history
