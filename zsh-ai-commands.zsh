@@ -89,7 +89,7 @@ fzf_ai_commands() {
   fi
 
   # check request is valid json
-  {echo $ZSH_AI_COMMANDS_GPT_REQUEST_BODY | jq > /dev/null} || {echo "Couldn't parse the body request" ; return}
+  {echo "$ZSH_AI_COMMANDS_GPT_REQUEST_BODY" | jq > /dev/null} || {echo "Couldn't parse the body request" ; return}
 
   ZSH_AI_COMMANDS_GPT_RESPONSE=$(curl -q --silent https://api.openai.com/v1/chat/completions \
     -H "Content-Type: application/json" \
