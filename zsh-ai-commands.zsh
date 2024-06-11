@@ -97,12 +97,26 @@ fzf_ai_commands() {
     -d "$ZSH_AI_COMMANDS_GPT_REQUEST_BODY")
   local ret=$?
 
-  # if the json parsing fails, we need a desperate parser
-  {
-      ZSH_AI_COMMANDS_PARSED=$(echo $ZSH_AI_COMMANDS_GPT_RESPONSE | jq -r '.choices[].message.content' | uniq)
-  } || {
-      ZSH_AI_COMMANDS_PARSED=$(echo $ZSH_AI_COMMANDS_GPT_RESPONSE | ppp -i 'import re' 're.sub("\[\dm|\\\\033|\\\\e", "DELETED", line)' | jq -r '.choices[].message.content' | uniq)
-  }
+  # if the json parsing fails, retry after some formating
+  exit_code=$(echo "$ZSH_AI_COMMANDS_GPT_RESPONSE" | jq -r '.choices[].message.content' 2>1) || exit_code=""
+  if [ ! -z "$exit_code" ]
+  then
+    ZSH_AI_COMMANDS_PARSED=$(echo "$ZSH_AI_COMMANDS_GPT_RESPONSE" |jq -r '.choices[].message.content' | uniq)
+  else
+    # retrying with better parsing
+    exit_code=$(echo "$ZSH_AI_COMMANDS_GPT_RESPONSE" |sed '/"content": "/ s/\\/\\\\/g' | jq -r '.choices[].message.content' 2>1) || exit_code=""
+
+    if [ ! -z "$exit_code" ]
+    then
+        # parse output
+        ZSH_AI_COMMANDS_PARSED=$(echo "$ZSH_AI_COMMANDS_GPT_RESPONSE" |sed '/"content": "/ s/\\/\\\\/g' | jq -r '.choices[].message.content' | uniq)
+    else
+        # give up parsing
+        echo "Failed to parse gpt response: $exit_code"
+        echo $ZSH_AI_COMMANDS_GPT_RESPONSE | jq -r '.choices[].message.content'
+    fi
+  fi
+
 
   if [ $ZSH_AI_COMMANDS_EXPLAINER = true ]
   then
