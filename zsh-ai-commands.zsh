@@ -33,6 +33,7 @@ fzf_ai_commands() {
 
   # FIXME: For some reason the buffer is only updated if zsh-autosuggestions is enabled
   BUFFER="Asking $ZSH_AI_COMMANDS_LLM_NAME for a command to do: $ZSH_AI_COMMANDS_USER_QUERY. Please wait..."
+  ZSH_AI_COMMANDS_USER_QUERY=$(echo "$ZSH_AI_COMMANDS_USER_QUERY" | sed 's/"/\\"/g')
   zle end-of-line
   zle reset-prompt
 
