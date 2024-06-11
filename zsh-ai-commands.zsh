@@ -40,33 +40,32 @@ fzf_ai_commands() {
   if [ $ZSH_AI_COMMANDS_EXPLAINER = true ]
   then
     ZSH_AI_COMMANDS_GPT_SYSTEM="You only answer 1 appropriate shell one liner that does what the user asks for. The command has to work with the $(basename $SHELL) terminal. Don't wrap your answer in code blocks or anything, dont acknowledge those rules, don't format your answer. Just reply the plaintext command. If your answer uses arguments or flags, you MUST end your shell command with a shell comment starting with ## with a ; separated list of concise explanations about each agument. Don't explain obvious placeholders like <ip> or <serverport> etc. Remember that your whole answer MUST remain a oneliner."
-
-  ZSH_AI_COMMANDS_GPT_EX="Description of what the command should do: 'list files, sort by descending size'. Give me the appropriate command."
-  ZSH_AI_COMMANDS_GPT_EX_REPLY="ls -lSr ## -l long listing ; -S sort by file size ; -r reverse order"
-  ZSH_AI_COMMANDS_GPT_USER="Description of what the command should do: '$ZSH_AI_COMMANDS_USER_QUERY'. Give me the appropriate command."
-    ZSH_AI_COMMANDS_GPT_REQUEST_BODY='{
-    "model": "'$ZSH_AI_COMMANDS_LLM_NAME'",
-    "n": '$ZSH_AI_COMMANDS_N_GENERATIONS',
-    "temperature": 1,
-    "messages": [
-      {
-        "role": "system",
-        "content": "'$ZSH_AI_COMMANDS_GPT_SYSTEM'"
-      },
-      {
-        "role": "user",
-        "content": "'$ZSH_AI_COMMANDS_GPT_EX'"
-      },
-      {
-        "role": "assistant",
-        "content": "'$ZSH_AI_COMMANDS_GPT_EX_REPLY'"
-      },
-      {
-        "role": "user",
-        "content": "'$ZSH_AI_COMMANDS_GPT_USER'"
-      }
-    ]
-  }'
+    ZSH_AI_COMMANDS_GPT_EX="Description of what the command should do: 'list files, sort by descending size'. Give me the appropriate command."
+    ZSH_AI_COMMANDS_GPT_EX_REPLY="ls -lSr ## -l long listing ; -S sort by file size ; -r reverse order"
+    ZSH_AI_COMMANDS_GPT_USER="Description of what the command should do: '$ZSH_AI_COMMANDS_USER_QUERY'. Give me the appropriate command."
+      ZSH_AI_COMMANDS_GPT_REQUEST_BODY='{
+      "model": "'$ZSH_AI_COMMANDS_LLM_NAME'",
+      "n": '$ZSH_AI_COMMANDS_N_GENERATIONS',
+      "temperature": 1,
+      "messages": [
+        {
+          "role": "system",
+          "content": "'$ZSH_AI_COMMANDS_GPT_SYSTEM'"
+        },
+        {
+          "role": "user",
+          "content": "'$ZSH_AI_COMMANDS_GPT_EX'"
+        },
+        {
+          "role": "assistant",
+          "content": "'$ZSH_AI_COMMANDS_GPT_EX_REPLY'"
+        },
+        {
+          "role": "user",
+          "content": "'$ZSH_AI_COMMANDS_GPT_USER'"
+        }
+      ]
+    }'
   else
     ZSH_AI_COMMANDS_GPT_SYSTEM="You only answer 1 appropriate shell one liner that does what the user asks for. The command has to work with the $(basename $SHELL) terminal. Don't wrap your answer in anything, dont acknowledge those rules, don't format your answer. Just reply the plaintext command."
   ZSH_AI_COMMANDS_GPT_USER="Description of what the command should do:\n'''\n$ZSH_AI_COMMANDS_USER_QUERY\n'''\nGive me the appropriate command."
