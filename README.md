@@ -46,8 +46,9 @@ The config can be set e.g in your `.zshrc` in this case be careful to not leak t
 | `ZSH_AI_COMMANDS_LLM_NAME` | `gpt-4o` | LLM name |
 | `ZSH_AI_COMMANDS_N_GENERATIONS` | `5` | Number of completions to ask for |
 | `ZSH_AI_COMMANDS_EXPLAINER` | `true` | If true, GPT will comment the command |
+| `ZSH_AI_COMMANDS_HISTORY` | `false` | If true, save the natural language prompt to the shell history (and atuin if installed) |
 
 
 ## Known Bugs
-- [ ] Sometimes the commands in the response have to much / unexpected special characters and the string is not preprocessed enough. In this case the fzf list stays empty.
+- [x] Sometimes the commands in the response have to much / unexpected special characters and the string is not preprocessed enough. In this case the fzf list stays empty.
 - [ ] The placeholder message, that should be shown while the GPT request is running, is not always shown. For me it only works if `zsh-autosuggestions` is enabled.

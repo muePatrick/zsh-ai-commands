@@ -1,3 +1,5 @@
+#!/bin/zsh
+
 # Check if required tools are installed
 (( ! $+commands[fzf] )) && return
 (( ! $+commands[curl] )) && return
@@ -13,71 +15,86 @@
 
 (( ! ${+ZSH_AI_COMMANDS_EXPLAINER} )) && typeset -g ZSH_AI_COMMANDS_EXPLAINER=true
 
+(( ! ${+ZSH_AI_COMMANDS_HISTORY} )) && typeset -g ZSH_AI_COMMANDS_HISTORY=false
+
 fzf_ai_commands() {
   setopt extendedglob
 
   [ -n "$BUFFER" ] || { echo "Empty prompt" ; return }
 
+  BUFFER="$(echo "$BUFFER" | sed 's/^AI_ASK: //g')"
+
   ZSH_AI_COMMANDS_USER_QUERY=$BUFFER
+
+  if [ $ZSH_AI_COMMANDS_HISTORY = true ]
+  then
+    # save to history
+    echo "AI_ASK: $ZSH_AI_COMMANDS_USER_QUERY" >> $HISTFILE
+    # also to atuin's history if installed
+    if command -v atuin &> /dev/null;
+    then
+        atuin_id=$(atuin history start "AI_ASK: $ZSH_AI_COMMANDS_USER_QUERY")
+        atuin history end --exit 0 "$atuin_id"
+    fi
+  fi
 
   # FIXME: For some reason the buffer is only updated if zsh-autosuggestions is enabled
   BUFFER="Asking $ZSH_AI_COMMANDS_LLM_NAME for a command to do: $ZSH_AI_COMMANDS_USER_QUERY. Please wait..."
+  ZSH_AI_COMMANDS_USER_QUERY=$(echo "$ZSH_AI_COMMANDS_USER_QUERY" | sed 's/"/\\"/g')
   zle end-of-line
   zle reset-prompt
 
   if [ $ZSH_AI_COMMANDS_EXPLAINER = true ]
   then
     ZSH_AI_COMMANDS_GPT_SYSTEM="You only answer 1 appropriate shell one liner that does what the user asks for. The command has to work with the $(basename $SHELL) terminal. Don't wrap your answer in code blocks or anything, dont acknowledge those rules, don't format your answer. Just reply the plaintext command. If your answer uses arguments or flags, you MUST end your shell command with a shell comment starting with ## with a ; separated list of concise explanations about each agument. Don't explain obvious placeholders like <ip> or <serverport> etc. Remember that your whole answer MUST remain a oneliner."
-
-  ZSH_AI_COMMANDS_GPT_EX="Description of what the command should do: 'list files, sort by descending size'. Give me the appropriate command."
-  ZSH_AI_COMMANDS_GPT_EX_REPLY="ls -lSr ## -l long listing ; -S sort by file size ; -r reverse order"
-  ZSH_AI_COMMANDS_GPT_USER="Description of what the command should do: '$ZSH_AI_COMMANDS_USER_QUERY'. Give me the appropriate command."
-    ZSH_AI_COMMANDS_GPT_REQUEST_BODY='{
-    "model": "'$ZSH_AI_COMMANDS_LLM_NAME'",
-    "n": '$ZSH_AI_COMMANDS_N_GENERATIONS',
-    "temperature": 1,
-    "messages": [
-      {
-        "role": "system",
-        "content": "'$ZSH_AI_COMMANDS_GPT_SYSTEM'"
-      },
-      {
-        "role": "user",
-        "content": "'$ZSH_AI_COMMANDS_GPT_EX'"
-      },
-      {
-        "role": "assistant",
-        "content": "'$ZSH_AI_COMMANDS_GPT_EX_REPLY'"
-      },
-      {
-        "role": "user",
-        "content": "'$ZSH_AI_COMMANDS_GPT_USER'"
-      }
-    ]
-  }'
+    ZSH_AI_COMMANDS_GPT_EX="Description of what the command should do: 'list files, sort by descending size'. Give me the appropriate command."
+    ZSH_AI_COMMANDS_GPT_EX_REPLY="ls -lSr ## -l long listing ; -S sort by file size ; -r reverse order"
+    ZSH_AI_COMMANDS_GPT_USER="Description of what the command should do: '$ZSH_AI_COMMANDS_USER_QUERY'. Give me the appropriate command."
+      ZSH_AI_COMMANDS_GPT_REQUEST_BODY='{
+      "model": "'$ZSH_AI_COMMANDS_LLM_NAME'",
+      "n": '$ZSH_AI_COMMANDS_N_GENERATIONS',
+      "temperature": 1,
+      "messages": [
+        {
+          "role": "system",
+          "content": "'$ZSH_AI_COMMANDS_GPT_SYSTEM'"
+        },
+        {
+          "role": "user",
+          "content": "'$ZSH_AI_COMMANDS_GPT_EX'"
+        },
+        {
+          "role": "assistant",
+          "content": "'$ZSH_AI_COMMANDS_GPT_EX_REPLY'"
+        },
+        {
+          "role": "user",
+          "content": "'$ZSH_AI_COMMANDS_GPT_USER'"
+        }
+      ]
+    }'
   else
     ZSH_AI_COMMANDS_GPT_SYSTEM="You only answer 1 appropriate shell one liner that does what the user asks for. The command has to work with the $(basename $SHELL) terminal. Don't wrap your answer in anything, dont acknowledge those rules, don't format your answer. Just reply the plaintext command."
-  ZSH_AI_COMMANDS_GPT_USER="Description of what the command should do:\n'''\n$ZSH_AI_COMMANDS_USER_QUERY\n'''\nGive me the appropriate command."
-  ZSH_AI_COMMANDS_GPT_REQUEST_BODY='{
-    "model": "'$ZSH_AI_COMMANDS_LLM_NAME'",
-    "n": '$ZSH_AI_COMMANDS_N_GENERATIONS',
-    "temperature": 1,
-    "messages": [
-      {
-        "role": "system",
-        "content": "'$ZSH_AI_COMMANDS_GPT_SYSTEM'"
-      },
-      {
-        "role": "user",
-        "content": "'$ZSH_AI_COMMANDS_GPT_USER'"
-      }
-    ]
-  }'
-
-
+    ZSH_AI_COMMANDS_GPT_USER="Description of what the command should do:\n'''\n$ZSH_AI_COMMANDS_USER_QUERY\n'''\nGive me the appropriate command."
+    ZSH_AI_COMMANDS_GPT_REQUEST_BODY='{
+      "model": "'$ZSH_AI_COMMANDS_LLM_NAME'",
+      "n": '$ZSH_AI_COMMANDS_N_GENERATIONS',
+      "temperature": 1,
+      "messages": [
+        {
+          "role": "system",
+          "content": "'$ZSH_AI_COMMANDS_GPT_SYSTEM'"
+        },
+        {
+          "role": "user",
+          "content": "'$ZSH_AI_COMMANDS_GPT_USER'"
+        }
+      ]
+    }'
   fi
 
-
+  # check request is valid json
+  {echo "$ZSH_AI_COMMANDS_GPT_REQUEST_BODY" | jq > /dev/null} || {echo "Couldn't parse the body request" ; return}
 
   ZSH_AI_COMMANDS_GPT_RESPONSE=$(curl -q --silent https://api.openai.com/v1/chat/completions \
     -H "Content-Type: application/json" \
@@ -85,12 +102,26 @@ fzf_ai_commands() {
     -d "$ZSH_AI_COMMANDS_GPT_REQUEST_BODY")
   local ret=$?
 
-  # if the json parsing fails, we need a desperate parser
-  {
-      ZSH_AI_COMMANDS_PARSED=$(echo $ZSH_AI_COMMANDS_GPT_RESPONSE | jq -r '.choices[].message.content' | uniq)
-  } || {
-      ZSH_AI_COMMANDS_PARSED=$(echo $ZSH_AI_COMMANDS_GPT_RESPONSE | ppp -i 'import re' 're.sub("\[\dm|\\\\033|\\\\e", "DELETED", line)' | jq -r '.choices[].message.content' | uniq)
-  }
+  # if the json parsing fails, retry after some formating
+  exit_code=$(echo "$ZSH_AI_COMMANDS_GPT_RESPONSE" | jq -r '.choices[].message.content' 2>&1) || exit_code=""
+  if [ ! -z "$exit_code" ]
+  then
+    ZSH_AI_COMMANDS_PARSED=$(echo "$ZSH_AI_COMMANDS_GPT_RESPONSE" |jq -r '.choices[].message.content' | uniq)
+  else
+    # retrying with better parsing
+    exit_code=$(echo "$ZSH_AI_COMMANDS_GPT_RESPONSE" |sed '/"content": "/ s/\\/\\\\/g' | jq -r '.choices[].message.content' 2>&1) || exit_code=""
+
+    if [ ! -z "$exit_code" ]
+    then
+        # parse output
+        ZSH_AI_COMMANDS_PARSED=$(echo "$ZSH_AI_COMMANDS_GPT_RESPONSE" |sed '/"content": "/ s/\\/\\\\/g' | jq -r '.choices[].message.content' | uniq)
+    else
+        # give up parsing
+        echo "Failed to parse gpt response: $exit_code"
+        echo $ZSH_AI_COMMANDS_GPT_RESPONSE | jq -r '.choices[].message.content'
+    fi
+  fi
+
 
   if [ $ZSH_AI_COMMANDS_EXPLAINER = true ]
   then
