@@ -98,13 +98,13 @@ fzf_ai_commands() {
   local ret=$?
 
   # if the json parsing fails, retry after some formating
-  exit_code=$(echo "$ZSH_AI_COMMANDS_GPT_RESPONSE" | jq -r '.choices[].message.content' 2>1) || exit_code=""
+  exit_code=$(echo "$ZSH_AI_COMMANDS_GPT_RESPONSE" | jq -r '.choices[].message.content' 2>&1) || exit_code=""
   if [ ! -z "$exit_code" ]
   then
     ZSH_AI_COMMANDS_PARSED=$(echo "$ZSH_AI_COMMANDS_GPT_RESPONSE" |jq -r '.choices[].message.content' | uniq)
   else
     # retrying with better parsing
-    exit_code=$(echo "$ZSH_AI_COMMANDS_GPT_RESPONSE" |sed '/"content": "/ s/\\/\\\\/g' | jq -r '.choices[].message.content' 2>1) || exit_code=""
+    exit_code=$(echo "$ZSH_AI_COMMANDS_GPT_RESPONSE" |sed '/"content": "/ s/\\/\\\\/g' | jq -r '.choices[].message.content' 2>&1) || exit_code=""
 
     if [ ! -z "$exit_code" ]
     then
