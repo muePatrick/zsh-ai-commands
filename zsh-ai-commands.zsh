@@ -15,6 +15,8 @@
 
 (( ! ${+ZSH_AI_COMMANDS_EXPLAINER} )) && typeset -g ZSH_AI_COMMANDS_EXPLAINER=true
 
+(( ! ${+ZSH_AI_COMMANDS_HISTORY} )) && typeset -g ZSH_AI_COMMANDS_HISTORY=false
+
 fzf_ai_commands() {
   setopt extendedglob
 
@@ -24,13 +26,16 @@ fzf_ai_commands() {
 
   ZSH_AI_COMMANDS_USER_QUERY=$BUFFER
 
-  # save to history
-  echo "AI_ASK: $ZSH_AI_COMMANDS_USER_QUERY" >> $HISTFILE
-  # also to atuin's history if installed
-  if command -v atuin &> /dev/null;
+  if [ $ZSH_AI_COMMANDS_HISTORY = true ]
   then
-      atuin_id=$(atuin history start "AI_ASK: $ZSH_AI_COMMANDS_USER_QUERY")
-      atuin history end --exit 0 "$atuin_id"
+    # save to history
+    echo "AI_ASK: $ZSH_AI_COMMANDS_USER_QUERY" >> $HISTFILE
+    # also to atuin's history if installed
+    if command -v atuin &> /dev/null;
+    then
+        atuin_id=$(atuin history start "AI_ASK: $ZSH_AI_COMMANDS_USER_QUERY")
+        atuin history end --exit 0 "$atuin_id"
+    fi
   fi
 
   # FIXME: For some reason the buffer is only updated if zsh-autosuggestions is enabled
